@@ -22,6 +22,90 @@ namespace GeneralDiff
 }
 )";
 
+	void printObject(std::ostream& stream, const Value& value, unsigned int indent = 0)
+	{
+		static const int tabSpace = 4;
+		for (unsigned int i = 0; i < indent * tabSpace; ++i)
+		{
+			stream << ' ';
+		}
+		stream << "{" << std::endl;
+		for (unsigned int i = 0; i < (indent + 1)*tabSpace; ++i)
+		{
+			stream << ' ';
+		}
+		Type type = value.GetType();
+		switch (type)
+		{
+		case rapidjson::kNullType:
+			stream << "[NULL]";
+			break;
+		case rapidjson::kFalseType:
+		case rapidjson::kTrueType:
+			stream << "boolean:" << std::boolalpha << value.GetBool();
+		case rapidjson::kObjectType:
+		{
+			stream << "object:" << std::endl;
+			for (auto it = value.MemberBegin(); it != value.MemberEnd(); ++it)
+			{
+				printObject(stream, it->value, indent + 1);
+			}
+		}
+			break;
+		case rapidjson::kArrayType:
+		{
+			if (!value.Empty())
+			{
+				stream << "array:[ ";
+				for (auto it = value.Begin(); it != value.End(); ++it)
+				{
+
+					stream << it->GetDouble() << " ";
+					//printObject(stream, *it);
+				}
+				stream << "]";
+			}
+		}
+			break;
+		case rapidjson::kStringType:
+			stream << "string:" << value.GetString();
+			break;
+		case rapidjson::kNumberType:
+			stream << "number:" << value.GetDouble();
+			break;
+		default:
+			break;
+		}
+
+		stream << std::endl;
+		for (unsigned int i = 0; i < indent*tabSpace; ++i)
+		{
+			stream << ' ';
+		}
+		stream << "}" << std::endl;
+	}
+
+	template<class Value>
+	struct Node
+	{
+		const Value& value;
+		const Node* pParent;
+		Node(const Value& value, const Node* pParent = nullptr)
+			: value(value)
+			, pParent(pParent)
+		{}
+	};
+
+	template<class Value>
+	std::string makePath(const Node<Value>& node, const std::string& path)
+	{
+		if (!node.pParent)
+		{
+			return path;
+		}
+		return makePath(*node.pParent, node.value.GetString() + path);
+	}
+
 	int Execute(int argc, const char* argv[])
 	{
 
@@ -34,7 +118,10 @@ namespace GeneralDiff
 			std::cerr << "parse error.\n";
 			return -1;
 		}
+		printObject(std::cout, document);
 
+
+		return 0;
 
 		// string
 		auto it = document.FindMember("string");
