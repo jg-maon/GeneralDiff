@@ -1,0 +1,23 @@
+{
+	"Shader":
+	{
+		"@Type": "Object",
+		"CBuffer":
+		{
+			"@Type": "Array",
+			"@DiffType": "Unordered",
+			"@IgnoreCondition":{"name":"Used","value": false },
+		},
+		"AnotherObject" : 
+		{
+			"@Type": "Object",
+			"Objects": 
+			{
+				"@Type": "Object",
+				"NAME": "String",
+				"Age": "Number",
+				"Example": 10,
+			},
+		},
+	}
+}
